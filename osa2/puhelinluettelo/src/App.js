@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
-import axios from 'axios'
+import personService from './services/personService'
 
 const App = () => {
 
@@ -11,39 +11,63 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("")
   const [newFilter, setNewFilter] = useState("")
 
-  const hook = () => {
-    console.log('effect')
-    axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        console.log('promise fulfilled')
-        setPersons(response.data)
-      })
-  }
-  
-  useEffect(hook, [])
+  useEffect(() => {
+    personService.fetch()
+        .then(response => {
+            setPersons(response)
+        })
+}, [])
 
   const addPerson = (event) => {
+
+    const personObject = {
+      name: newName,
+      number: newNumber,
+      id: Math.floor(Math.random() * 101)
+    }
+
     if (persons.some(person => newName === person.name)){
       event.preventDefault()
-      alert(`${newName} is already added to phonebook`)
-      setNewName('')
-      setNewNumber('')
+        if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+          const previousPerson = persons.find(n => n.name === newName);
+          personService
+          .update(previousPerson.id, personObject)
+              .then(returnedPerson => {
+                setPersons(
+                  persons.map(n => (n.name === newName ? returnedPerson : n))
+                );
+          })
+      }
     }
     else if (newName === ''){
       event.preventDefault()
       alert("Name is required.")
     }
     else {
-      event.preventDefault()
-      const personObject = {
-        name: newName,
-        number: newNumber
-      }
-      setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
+      personService
+        .create(personObject)
+        .then(response => {
+            setPersons(persons.concat(response.data))
+      })
     }
+    setNewName('')
+    setNewNumber('')
+  }
+
+  const toggleRemovePerson = (id, name) => { 
+    if (window.confirm(`Delete ${name}?`))
+      personService
+        .remove(id)
+        .then(() => {
+            setPersons(persons.filter(n => n.id !== id))
+            setNewName("");
+            setNewNumber("");
+        }).catch(error => {
+          alert(
+            setPersons(persons.filter(n => n.name !== name))
+            `${name}' was already deleted from server`
+          )
+        })
   }
 
   const handlePersonInputChange = (event) => {
@@ -78,9 +102,10 @@ const App = () => {
       
       />
       <h2>Numbers</h2>
-      <Persons
+      <Persons 
         persons={persons}
         newFilter={newFilter}
+        toggleRemovePerson={toggleRemovePerson}
       />
     </div>
   )
