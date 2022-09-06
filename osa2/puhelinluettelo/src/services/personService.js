@@ -1,15 +1,20 @@
 import axios from 'axios'
 const baseUrl = 'http://localhost:3001/persons'
 
-const fetch = async () => {
-    const response = await axios.get(baseUrl)
-    return response.data
+const fetch = () => {
+    const response = axios.get(baseUrl)
+    const nonExisting = {
+        id: 10000,
+        name: 'Non-existing Person',
+        number: '123123',
+      }
+      return response.then(response => response.data.concat(nonExisting))
 }
 
 const create = personObject => {
-    const request = axios.post(baseUrl, personObject)
-    return request.then(response => response.data)
-}
+    const request = axios.post(baseUrl, personObject);
+    return request.then(response => response.data);
+  };
 
 const remove = id => {
     const request = axios.delete(`${baseUrl}/${id}`)

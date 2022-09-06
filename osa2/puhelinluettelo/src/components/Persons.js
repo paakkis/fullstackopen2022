@@ -3,12 +3,12 @@ import Person from './Person'
 const Persons = (props) => {
     return (
         <ul>
-            {props.persons.filter(person => person.name.toLowerCase().includes(props.newFilter.toLowerCase())).map((person, idx) => (
+            {props.persons.filter(person => person.name.toLowerCase().includes(props.newFilter.toLowerCase())).map((person) => (
                 <Person 
-                    key={idx} 
+                    key={person.id} 
                     name={person.name} 
                     number={person.number}
-                    toggleRemovePerson={() => props.toggleRemovePerson(person.id, person.name)}
+                    remove={() => props.toggleRemovePerson(person.name, person.id)}
                     />
                 )
             )
