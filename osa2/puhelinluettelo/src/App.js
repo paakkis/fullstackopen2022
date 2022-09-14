@@ -13,7 +13,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("")
   const [newFilter, setNewFilter] = useState("")
   const [notification, setNotification] = useState(null)
-  const [error, setError] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
 
   const addPerson = (event) => {
@@ -44,10 +44,10 @@ const App = () => {
           })
           .catch(error => {
             setPersons(persons.filter(n => n.name !== personObject.name))
-            setError(`Information of ${personObject.name} was already removed from server.`);
+            setErrorMessage(`Information of ${personObject.name} was already removed from server.`);
           })
           setTimeout(() => {
-              setError(null)
+              setErrorMessage(null)
         }, 5000)
       }
     }
@@ -63,6 +63,12 @@ const App = () => {
               setNotification(null)
             }, 5000)
       })
+      .catch(error => {
+        setErrorMessage(error.response.data.error)
+      })
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
     }
   }
 
@@ -77,10 +83,10 @@ const App = () => {
             setNewNumber("");
         }).catch(error => {
             setPersons(persons.filter(n => n.name !== name))
-            setError(`Information of ${name} was already removed from server.`);
+            setErrorMessage(`Information of ${name} was already removed from server.`);
         })
           setTimeout(() => {
-              setError(null)
+              setErrorMessage(null)
         }, 5000)
   }  
   useEffect(() => {
@@ -108,7 +114,7 @@ const App = () => {
     <div>
       <h2>Phonebook</h2>
       <Notification message={notification}/>
-      <Error message={error}/>
+      <Error message={errorMessage}/>
       <Filter 
         newFilter={newFilter}
         handleFilterInputChange={handleFilterInputChange}
